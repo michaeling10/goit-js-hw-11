@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline';"
+      content="connect-src http://gc.kis.v2.scr.kaspersky-labs.com ws://gc.kis.v2.scr.kaspersky-labs.com 'self' https://pixabay.com"
     />
+    <link rel="stylesheet" href="./css/style.css" />
     <link
       rel="stylesheet"
       href="./css/simplelightbox-master/dist/simple-lightbox.min.css"
@@ -17,19 +18,21 @@
     <form class="search-form" id="search-form">
       <input
         type="text"
+        class="input_form"
         name="searchQuery"
         autocomplete="off"
         placeholder="Search images..."
       />
-      <button type="submit">Search</button>
+      <button type="submit" class="btn-form">Search</button>
     </form>
 
     <div class="gallery"></div>
 
-    <button type="button" class="load-more" style="display: none">
-      Load more
-    </button>
-
+    <div class="btn-load-container">
+      <button type="button" class="load-more" style="display: none">
+        Load more!
+      </button>
+    </div>
     <script src="./index.js" type="module"></script>
   </body>
 </html>

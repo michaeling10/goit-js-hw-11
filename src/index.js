@@ -2,24 +2,28 @@
 
 import axios from 'axios';
 import Notiflix from 'notiflix';
+// Described in documentation
 import SimpleLightbox from 'simplelightbox';
+// Additional styles import
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreButton = document.querySelector('.load-more');
-const lightbox = new SimpleLightbox('.gallery a', {
+const lightbox = new SimpleLightbox('.gallery__lightbox', {
+  onShow: instance => {
+    document.addEventListener('keydown', e => handleKeyDown(e, instance));
+  },
+  captionDelay: 250,
   disableInlineStyles: true,
 });
 
 let page = 1;
 
 console.log('Index.js is loaded!');
-console.log('Search form:', searchForm);
-console.log('Gallery:', gallery);
-console.log('Load more button:', loadMoreButton);
-console.log('Lightbox:', lightbox);
 
 searchForm.addEventListener('submit', async e => {
+  console.log('submit is ran!');
   e.preventDefault();
   const searchQuery = e.target.elements.searchQuery.value.trim();
 
@@ -33,7 +37,7 @@ searchForm.addEventListener('submit', async e => {
 
   try {
     const { data } = await axios.get(
-      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
+      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
 
     if (data.hits.length === 0) {
@@ -56,7 +60,7 @@ loadMoreButton.addEventListener('click', async () => {
 
   try {
     const { data } = await axios.get(
-      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q=${searchForm.elements.searchQuery.value.trim()}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
+      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q&q=${searchForm.elements.searchQuery.value.trim()}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
 
     renderImages(data.hits);
@@ -89,14 +93,18 @@ function createImageCard(image) {
   const card = document.createElement('div');
   card.classList.add('photo-card');
 
-  const link = document.createElement('a');
-  link.href = image.largeImageURL;
-  link.setAttribute('data-lightbox', 'gallery');
+  const linkContainer = document.createElement('a');
+  linkContainer.classList = 'gallery__lightbox';
+  linkContainer.href = image.largeImageURL;
 
   const img = document.createElement('img');
+  img.classList.add('gallery__img');
   img.src = image.webformatURL;
   img.alt = image.tags;
   img.loading = 'lazy';
+
+  linkContainer.appendChild(img);
+  card.appendChild(linkContainer);
 
   const info = document.createElement('div');
   info.classList.add('info');
@@ -108,8 +116,6 @@ function createImageCard(image) {
     info.appendChild(p);
   });
 
-  link.appendChild(img);
-  card.appendChild(link);
   card.appendChild(info);
 
   return card;
@@ -121,9 +127,16 @@ function clearGallery() {
 }
 
 function showLoadMoreButton() {
-  loadMoreButton.style.display = 'block';
+  loadMoreButton.style.display = 'flex';
 }
 
 function hideLoadMoreButton() {
   loadMoreButton.style.display = 'none';
+}
+
+function handleKeyDown(e, instance) {
+  if (e.key === 'Escape') {
+    instance.close();
+    document.removeEventListener('keydown', handleKeyDown);
+  }
 }
