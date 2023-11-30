@@ -18,6 +18,20 @@ const lightbox = new SimpleLightbox('.gallery__lightbox', {
   disableInlineStyles: true,
 });
 
+function initLightbox() {
+  const lightbox = new SimpleLightbox('.gallery__lightbox', {
+    onShow: instance => {
+      document.addEventListener('keydown', e => handleKeyDown(e, instance));
+    },
+    captionDelay: 250,
+    disableInlineStyles: true,
+  });
+}
+
+function refreshLightbox() {
+  lightbox.refresh();
+}
+
 let page = 1;
 
 console.log('Index.js is loaded!');
@@ -37,7 +51,7 @@ searchForm.addEventListener('submit', async e => {
 
   try {
     const { data } = await axios.get(
-      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
+      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q=${searchForm.elements.searchQuery.value.trim()}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
 
     if (data.hits.length === 0) {
@@ -48,6 +62,8 @@ searchForm.addEventListener('submit', async e => {
       Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
       renderImages(data.hits);
       showLoadMoreButton();
+
+      initLightbox();
     }
   } catch (error) {
     console.error('Error fetching images:', error);
@@ -60,17 +76,17 @@ loadMoreButton.addEventListener('click', async () => {
 
   try {
     const { data } = await axios.get(
-      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q&q=${searchForm.elements.searchQuery.value.trim()}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
+      `https://pixabay.com/api/?key=40939556-45ae640df6958a2bad92a04f4&q=${searchForm.elements.searchQuery.value.trim()}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
 
-    renderImages(data.hits);
-    lightbox.refresh();
-
-    if (data.hits.length === 0 || data.hits.length < 40) {
+    if (data.hits.length === 0) {
       hideLoadMoreButton();
       Notiflix.Notify.info(
         "We're sorry, but you've reached the end of search results."
       );
+    } else {
+      renderImages(data.hits);
+      refreshLightbox();
     }
   } catch (error) {
     console.error('Error fetching more images:', error);
